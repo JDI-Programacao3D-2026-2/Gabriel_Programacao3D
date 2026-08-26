@@ -42,6 +42,10 @@ public class CharacterMove : MonoBehaviour
             }
         }
 
+        if (Keyboard.current[Key.Space].isPressed)
+        {
+            rb.AddForce(new Vector3(direction.x * 100f, rb.linearVelocity.y, direction.z * 100f), ForceMode.Impulse);
+        }
 
         direction = Vector3.ClampMagnitude(direction, 1f);
         rb.linearVelocity = new Vector3(direction.x * speed, rb.linearVelocity.y, direction.z * speed);
