@@ -20,7 +20,7 @@ public class MouseOrbit : MonoBehaviour
             Vector2 delta = Mouse.current.delta.ReadValue() * MouseSensitivity;
             rotX += delta.x;
             rotY -= delta.y;
-            rotY = Mathf.Clamp(rotY + delta.y, -60, 0);
+            rotY = Mathf.Clamp(rotY, -9, 60);
 
             Quaternion rotation = Quaternion.Euler(rotY, rotX, 0);
             transform.position = player.position - (rotation * Vector3.forward * distance);

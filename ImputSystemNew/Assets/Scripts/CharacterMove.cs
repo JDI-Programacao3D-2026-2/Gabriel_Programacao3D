@@ -6,6 +6,7 @@ public class CharacterMove : MonoBehaviour
     private float speed = 5f;
     public Rigidbody rb;
     private Vector3 direction;
+    private bool onGround = true;
 
     void Update()
     {
@@ -67,9 +68,25 @@ public class CharacterMove : MonoBehaviour
 
     void HandleJump()
     {
-       if (Keyboard.current[Key.Space].wasPressedThisFrame)
+       if (Keyboard.current[Key.Space].wasPressedThisFrame && onGround)
         {
             rb.AddForce(new Vector3(0f, 10f, 0f),ForceMode.Impulse);
         } 
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            onGround = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            onGround = false;
+        }
     }
 }
