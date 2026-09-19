@@ -3,10 +3,17 @@ using UnityEngine.InputSystem;
 
 public class CharacterMove : MonoBehaviour
 {
-    private float speed = 5f;
+    private float speed = 4.5f;
     public Rigidbody rb;
     private Vector3 direction;
     private bool onGround = true;
+    private float staminaMax = 100f;
+    private float stamina;
+
+    void Start()
+    {
+        stamina = staminaMax;    
+    }
 
     void Update()
     {
@@ -14,8 +21,7 @@ public class CharacterMove : MonoBehaviour
         direction = Vector3.zero;
 
         HandleMovement();
-        HandleCrouchAndRun();
-        HandleJump();
+        HandleRun();
 
     }
 
@@ -44,34 +50,31 @@ public class CharacterMove : MonoBehaviour
         }
     }
 
-    void HandleCrouchAndRun()
+    void HandleRun()
     {
-        if (Keyboard.current[Key.LeftCtrl].isPressed)
-        {
-            speed = 2.5f;
-            rb.mass = 1.25f;
-        }
-        else
-        {
-            if (Keyboard.current[Key.LeftShift].isPressed)
+            if (Keyboard.current[Key.LeftShift].isPressed && stamina > 0f)
             {
                 speed = 7.5f;
-                rb.mass = 0.75f;
+                if (stamina > 0f)
+                {
+                    stamina -= 0.15f;
+                }
             }
             else
             {
-                speed = 5f;
-                rb.mass = 1f;
+                speed = 3.5f;
+                if (stamina < staminaMax)
+                {
+                    if (direction == Vector3.zero)
+                    {
+                        stamina += 0.05f;
+                    }
+                    else
+                    {
+                        stamina += 0.25f;
+                    }
+                }
             }
-        }
-    }
-
-    void HandleJump()
-    {
-       if (Keyboard.current[Key.Space].wasPressedThisFrame && onGround)
-        {
-            rb.AddForce(new Vector3(0f, 10f, 0f),ForceMode.Impulse);
-        } 
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -88,5 +91,9 @@ public class CharacterMove : MonoBehaviour
         {
             onGround = false;
         }
+    }
+    public float GetStamina()
+    {
+        return stamina;
     }
 }
