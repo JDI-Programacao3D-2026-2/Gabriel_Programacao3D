@@ -161,6 +161,7 @@ GameObject:
   - component: {fileID: 437011520}
   - component: {fileID: 437011522}
   - component: {fileID: 437011521}
+  - component: {fileID: 437011523}
   m_Layer: 2
   m_Name: Cylinder
   m_TagString: Untagged
@@ -241,6 +242,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 437011519}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &437011523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437011519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48c619abe37570449a709116c5842819, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShootPool
+  projectilePrefab: {fileID: 1794739853006432053, guid: 8dbb67d51d6cf59409c90c5827846a80, type: 3}
+  firePoint: {fileID: 265877073}
+  poolSize: 20
+  currentAmmo: 0
 --- !u!1 &464225397
 GameObject:
   m_ObjectHideFlags: 0

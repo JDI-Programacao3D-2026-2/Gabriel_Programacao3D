@@ -63,7 +63,7 @@ public class CharacterMove : MonoBehaviour
             else
             {
                 speed = 3.5f;
-                if (stamina < staminaMax)
+                if (stamina < staminaMax && !Keyboard.current[Key.LeftShift].isPressed)
                 {
                     if (direction == Vector3.zero)
                     {

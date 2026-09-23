@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class ShootPool : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class ShootPool : MonoBehaviour
     public int currentAmmo;
     private int activeProjectiles = 0;
     private ObjectPool<GameObject> pool;
+    private bool reloading = false;
 
     void Awake()
     {
@@ -30,6 +32,10 @@ public class ShootPool : MonoBehaviour
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             Shoot();
+        }
+        if (Keyboard.current[Key.R].wasPressedThisFrame && currentAmmo <= poolSize && !reloading)
+        {
+            StartCoroutine(Reload());
         }
     }
 
@@ -53,5 +59,17 @@ public class ShootPool : MonoBehaviour
     {
         activeProjectiles--;
         pool.Release(projectile);
+    }
+
+    IEnumerator Reload()
+    {
+        reloading = true;
+        Debug.Log("Recarregando. . .");
+
+        yield return new WaitForSeconds(2f);
+        currentAmmo = poolSize;
+
+        Debug.Log("Recarregou! Mete bala");
+        reloading = false;
     }
 }
