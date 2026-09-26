@@ -5,13 +5,22 @@ using System.Collections;
 
 public class ShootPool : MonoBehaviour
 {
+    [Header("General Section")]
     public GameObject projectilePrefab;
     public Transform firePoint;
     public int poolSize = 20;
-    public int currentAmmo;
     private int activeProjectiles = 0;
     private ObjectPool<GameObject> pool;
     private bool reloading = false;
+    public int currentAmmo;
+
+    [Header("Enemy Section")]
+    public bool isEnemy = false;
+    private bool canShoot = false;
+    private float fireRate = 0.5f;
+    private float nextFireTime = 0f;
+    public LayerMask layerMask;
+    public Transform player;
 
     void Awake()
     {
@@ -29,13 +38,42 @@ public class ShootPool : MonoBehaviour
 
     void Update()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current.leftButton.wasPressedThisFrame && !isEnemy)
         {
             Shoot();
         }
-        if (Keyboard.current[Key.R].wasPressedThisFrame && currentAmmo <= poolSize && !reloading)
+        if (Keyboard.current[Key.R].wasPressedThisFrame && currentAmmo <= poolSize && !reloading && !isEnemy)
         {
             StartCoroutine(Reload());
+        }
+
+        // Enemy Section
+        if (isEnemy && canShoot && Time.time >= nextFireTime)
+        {
+            Shoot();
+            nextFireTime = Time.time + fireRate;
+        }
+        if (isEnemy && currentAmmo <= 0 && !reloading)
+        {
+            StartCoroutine(Reload());
+        }
+
+    }
+
+    void FixedUpdate()
+    {
+        if (isEnemy)
+        {
+            canShoot = false;
+            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, Mathf.Infinity, layerMask))
+            {
+                canShoot = true;
+                Debug.DrawLine(transform.position, hit.point, Color.green);
+            }
+            else
+            {
+                Debug.DrawLine(transform.position, transform.position + transform.forward * 100f, Color.red);
+            }
         }
     }
 
@@ -64,12 +102,8 @@ public class ShootPool : MonoBehaviour
     IEnumerator Reload()
     {
         reloading = true;
-        Debug.Log("Recarregando. . .");
-
         yield return new WaitForSeconds(2f);
         currentAmmo = poolSize;
-
-        Debug.Log("Recarregou! Mete bala");
         reloading = false;
     }
 }
