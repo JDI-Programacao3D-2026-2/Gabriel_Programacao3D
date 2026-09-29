@@ -4,7 +4,7 @@ public class GeradorDeCenario : MonoBehaviour
 {
     [Header("Imagem do Mapa")]
     [Tooltip("A imagem que define o cenário. Ative 'Read/Write' nas configurações dela!")]
-    [SerializeField] private Texture2D mapaTextura;
+    public Texture2D mapaTextura;
 
     [Header("Prefabs dos Elementos")]
     [SerializeField] private GameObject prefabGelo;
