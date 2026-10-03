@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using static Navmesh;
 
 public class Projectile : MonoBehaviour
 {
@@ -20,7 +21,15 @@ public class Projectile : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Shootpool.ReturnProjectile(gameObject);   
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Navmesh navmesh = collision.gameObject.GetComponent<Navmesh>();
+            if (navmesh != null)
+            {
+                navmesh.ChangeState(EnemyState.FurtivePatrol);
+            }
+        }
+        Shootpool.ReturnProjectile(gameObject);  
     }
 
     IEnumerator Kill() // Pra caso não acerte nada
