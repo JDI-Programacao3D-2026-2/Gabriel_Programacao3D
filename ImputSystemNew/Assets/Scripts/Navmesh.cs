@@ -7,12 +7,11 @@ public class Navmesh : MonoBehaviour
     public NavMeshAgent agent;
     public Transform[] waypoints;
     public float baseSpeed;
+    public float losePlayerDistance = 5f;
 
     public enum EnemyState
     {
         WayPatrol,
-        RandomPatrol,
-        FurtivePatrol,
         Pursuit
     }
 
@@ -36,36 +35,11 @@ public class Navmesh : MonoBehaviour
             case EnemyState.WayPatrol:
                 WayPatrol();
                 break;
-            case EnemyState.RandomPatrol:
-                RandomPatrol();
-                break;
             case EnemyState.Pursuit:
                 Pursuit();
                 break;
-            case EnemyState.FurtivePatrol:
-                FurtivePatrol();
-                break;
             default:
                 break;
-        }
-
-        if (currentState != EnemyState.FurtivePatrol)
-        {
-            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 20, layerMask))
-            {
-                ChangeState(EnemyState.Pursuit);
-            }
-            else
-            {
-                ChangeState(EnemyState.WayPatrol);
-            }
-        }
-        else
-        {
-            if (Vector3.Distance(transform.position, player.position) >= 20f)
-            {
-                ChangeState(EnemyState.WayPatrol);
-            }
         }
     }
 
@@ -77,6 +51,13 @@ public class Navmesh : MonoBehaviour
             agent.stoppingDistance = 6f;
             agent.SetDestination(player.position);
             transform.LookAt(player);
+
+            float dist = Vector3.Distance(transform.position, player.position);
+            if (dist >= losePlayerDistance)
+            {
+                agent.ResetPath();
+                ChangeState(EnemyState.WayPatrol);
+            }
         }
     }
 
@@ -89,23 +70,40 @@ public class Navmesh : MonoBehaviour
             int randomIndex = Random.Range(0, waypoints.Length);
             agent.SetDestination(waypoints[randomIndex].position);
         }
+        SearchPlayer();
     }
 
-    void RandomPatrol()
+    void SearchPlayer()
     {
-        
-    }
-
-    void FurtivePatrol()
-    {
-        agent.stoppingDistance = 0f;
-        agent.speed = baseSpeed * 1.75f;
-        if (waypoints.Length != 0 && !agent.pathPending && agent.remainingDistance < 0.5f)
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 10f, layerMask) || Vector3.Distance(transform.position, player.position) <= 5f)
         {
-            int randomIndex = Random.Range(0, waypoints.Length);
-            agent.SetDestination(waypoints[randomIndex].position);
+            ChangeState(EnemyState.Pursuit);
+            CallBackup();
         }
     }
 
- 
+    void CallBackup()
+    {
+        Navmesh[] todosInimigos = FindObjectsByType<Navmesh>();
+        foreach (Navmesh aliado in todosInimigos)
+        {
+            float dist = Vector3.Distance(transform.position, aliado.transform.position);
+            if (dist < 5f)
+            {
+                aliado.ChangeState(EnemyState.Pursuit);
+            }
+        }
+    }
+
+    void RunAway()
+    {
+        // Chamada quando o inimigo estiver com "pouca vida"
+        float maxDist = 0f;
+        Transform highestWay = transform;
+        foreach (Transform way in waypoints)
+        {
+            highestWay = Vector3.Distance(transform.position, way.position) >= maxDist ? way : highestWay;
+            maxDist = Vector3.Distance(transform.position, way.position) >= maxDist ? Vector3.Distance(transform.position, way.position) : maxDist;
+        }
+    }
 }

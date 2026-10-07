@@ -26,7 +26,7 @@ public class Projectile : MonoBehaviour
             Navmesh navmesh = collision.gameObject.GetComponent<Navmesh>();
             if (navmesh != null)
             {
-                navmesh.ChangeState(EnemyState.FurtivePatrol);
+                
             }
         }
         Shootpool.ReturnProjectile(gameObject);  
