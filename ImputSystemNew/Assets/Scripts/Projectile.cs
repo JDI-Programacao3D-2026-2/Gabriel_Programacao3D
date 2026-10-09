@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using static Navmesh;
+using static EnemyNavmesh;
 
 public class Projectile : MonoBehaviour
 {
@@ -23,10 +23,10 @@ public class Projectile : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            Navmesh navmesh = collision.gameObject.GetComponent<Navmesh>();
+            EnemyNavmesh navmesh = collision.gameObject.GetComponent<EnemyNavmesh>();
             if (navmesh != null)
             {
-                
+                navmesh.OnDamage();
             }
         }
         Shootpool.ReturnProjectile(gameObject);  

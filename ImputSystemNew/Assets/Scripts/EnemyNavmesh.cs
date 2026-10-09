@@ -1,13 +1,24 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Navmesh : MonoBehaviour
+public class EnemyNavmesh : MonoBehaviour
 {
     public Transform player;
     public NavMeshAgent agent;
     public Transform[] waypoints;
+
     public float baseSpeed;
+    public int maxLife = 10;
+    public int life;
     public float losePlayerDistance = 5f;
+    public float detectPlayerDistance = 20f;
+    public float allyBackupDistance = 10f;
+    public bool isRunningAway = false;
+
+    void Start()
+    {
+        life = maxLife;   
+    }
 
     public enum EnemyState
     {
@@ -45,7 +56,7 @@ public class Navmesh : MonoBehaviour
 
     void Pursuit()
     {
-        if (player != null)
+        if (player != null || !isRunningAway)
         {
             agent.speed = baseSpeed;
             agent.stoppingDistance = 6f;
@@ -64,9 +75,13 @@ public class Navmesh : MonoBehaviour
     void WayPatrol()
     {
         agent.stoppingDistance = 0f;
-        agent.speed = baseSpeed;
         if (waypoints.Length != 0 && !agent.pathPending && agent.remainingDistance < 0.5f)
         {
+            if (isRunningAway)
+            {
+                isRunningAway = false;
+            }
+            agent.speed = baseSpeed;
             int randomIndex = Random.Range(0, waypoints.Length);
             agent.SetDestination(waypoints[randomIndex].position);
         }
@@ -75,7 +90,12 @@ public class Navmesh : MonoBehaviour
 
     void SearchPlayer()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 10f, layerMask) || Vector3.Distance(transform.position, player.position) <= 5f)
+        if (isRunningAway)
+        {
+            return;
+        }
+
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, detectPlayerDistance, layerMask) || Vector3.Distance(transform.position, player.position) <= detectPlayerDistance / 2)
         {
             ChangeState(EnemyState.Pursuit);
             CallBackup();
@@ -84,11 +104,11 @@ public class Navmesh : MonoBehaviour
 
     void CallBackup()
     {
-        Navmesh[] todosInimigos = FindObjectsByType<Navmesh>();
-        foreach (Navmesh aliado in todosInimigos)
+        EnemyNavmesh[] todosInimigos = FindObjectsByType<EnemyNavmesh>();
+        foreach (EnemyNavmesh aliado in todosInimigos)
         {
             float dist = Vector3.Distance(transform.position, aliado.transform.position);
-            if (dist < 5f)
+            if (dist < allyBackupDistance || !aliado.isRunningAway)
             {
                 aliado.ChangeState(EnemyState.Pursuit);
             }
@@ -97,13 +117,30 @@ public class Navmesh : MonoBehaviour
 
     void RunAway()
     {
-        // Chamada quando o inimigo estiver com "pouca vida"
+        isRunningAway = true;
         float maxDist = 0f;
         Transform highestWay = transform;
         foreach (Transform way in waypoints)
         {
             highestWay = Vector3.Distance(transform.position, way.position) >= maxDist ? way : highestWay;
             maxDist = Vector3.Distance(transform.position, way.position) >= maxDist ? Vector3.Distance(transform.position, way.position) : maxDist;
+        }
+        agent.speed = baseSpeed * 2f;
+        agent.SetDestination(highestWay.position);
+        ChangeState(EnemyState.WayPatrol);
+    }
+    
+    // Chama saporra quando toma dano
+    public void OnDamage()
+    {
+        life--;
+        if (life <= maxLife / 2)
+        {
+            float rand = Random.value;
+            if (rand <= 0.5f)
+            {
+                RunAway();
+            }
         }
     }
 }
